@@ -1,0 +1,111 @@
+import streamlit as st
+from urllib.parse import quote
+
+st.set_page_config(page_title="Ahmed'in 15. Yaş Sürprizi 🎁", page_icon="🎂", layout="centered")
+st.markdown('''<style>
+.stApp {background:linear-gradient(160deg,#0b1024,#1b1740);color:#f8f7ff}
+h1,h2,h3,p,label {color:#f8f7ff!important}
+.stButton>button {background:linear-gradient(90deg,#7656f6,#c15be9);color:white;border:0;border-radius:14px;padding:0.7rem 1rem;font-weight:750;width:100%}
+[data-testid="stVerticalBlockBorderWrapper"] {border-color:#615b8a!important;border-radius:18px!important}
+</style>''', unsafe_allow_html=True)
+
+if 'page' not in st.session_state: st.session_state.page='welcome'
+if 'drum' not in st.session_state: st.session_state.drum=0
+if 'kind' not in st.session_state: st.session_state.kind=None
+if 'answers' not in st.session_state: st.session_state.answers={}
+if 'idx' not in st.session_state: st.session_state.idx=0
+
+def go(page):
+    st.session_state.page=page
+    st.rerun()
+
+def question(id, title, options=None, help=None):
+    return {'id':id,'title':title,'options':options,'help':help}
+
+common=[question('purpose','Bilgisayarı en çok ne için kullanacaksın?',['Oyun','Okul ve dersler','Kodlama','Video düzenleme / tasarım','Hepsi']),question('cpu','Hangi işlemciyi istersin?',['AMD Ryzen 5','AMD Ryzen 7','AMD Ryzen 9','Intel Core i5 / Core Ultra 5','Intel Core i7 / Core Ultra 7','Intel Core i9 / Core Ultra 9','Kararsızım'],'İşlemcinin nesli ve tam modeli de önemlidir.'),question('gpu','Hangi ekran kartı seviyesini istersin?',['Entegre grafik','NVIDIA RTX 5060 seviyesi','NVIDIA RTX 5070 seviyesi','NVIDIA RTX 5080 seviyesi','AMD Radeon alternatifi','Kararsızım'],'Laptop GPU ve masaüstü GPU aynı isimde olsa da performansları farklı olabilir.'),question('ram','Kaç GB RAM istersin?',['16 GB','32 GB','64 GB','96 GB veya üzeri','Kararsızım']),question('ssd','Ne kadar SSD depolama alanı istersin?',['512 GB','1 TB','2 TB','4 TB','Kararsızım'])]
+laptop=[question('screen','Laptop ekranı kaç inç olsun?',['13–14 inç','15–16 inç','17–18 inç','Kararsızım']),question('resolution','Ekran çözünürlüğü ne olsun?',['1080p','QHD / 1600p','4K','Kararsızım']),question('refresh','Ekran yenileme hızı kaç Hz olsun?',['60 Hz','120 Hz','144–165 Hz','240 Hz veya üzeri','Kararsızım']),question('battery','Pil ömrü ne kadar önemli?',['Çok önemli','Orta derecede önemli','Genellikle prizde kullanacağım']),question('weight','Laptopun ağırlığı nasıl olsun?',['1,5 kg altı','1,5–2,2 kg','Ağırlık önemli değil']),question('upgrade','Sonradan RAM veya SSD yükseltmek ister misin?',['Evet','Hayır','Kararsızım'],'Bazı laptoplarda RAM lehimlidir; modele göre kontrol edilmeli.')]
+desktop=[question('board','Anakartında hangi bağlantılar olsun?',['Wi-Fi ve Bluetooth','Ethernet yeterli','Kararsızım'],'Anakart işlemci soketi ve RAM ile uyumlu olmalı.'),question('cooler','Hangi işlemci soğutmasını istersin?',['Hava soğutma','240 mm sıvı soğutma','360 mm sıvı soğutma','Kararsızım']),question('case','Hangi kasa boyutunu istersin?',['Mini ITX','Micro ATX','Mid Tower','Full Tower','Kararsızım']),question('psu','Güç kaynağı kaç watt olsun?',['650 W','750 W','850 W','1000 W','Kararsızım'],'PSU watt değeri seçilen parçaların gerçek güç ihtiyacına göre belirlenmeli.'),question('monitor','Hangi monitör özelliklerini istersin?',['1080p / 144 Hz','1080p / 240 Hz','1440p / 144 Hz','1440p / 240 Hz','4K / 144 Hz','Kararsızım'])]
+ending=[question('budget','Yaklaşık bütçe tercihin nedir?',['£500–£800','£800–£1.200','£1.200–£1.800','£1.800–£2.500','£2.500 üzeri','Ailemle konuşacağım']),question('games','Hangi oyunları veya programları kullanacaksın?'),question('extra','Başka özel bir isteğin var mı?')]
+questions=common+(laptop if st.session_state.kind=='Laptop' else desktop)+ending
+
+if st.session_state.page=='welcome':
+    st.markdown('# 🎂 İYİ Kİ DOĞDUN AHMED!')
+    st.markdown('## 🎁 15. yaşına özel bir sürpriz seni bekliyor!')
+    st.write('Hazır mısın?')
+    if st.button('🥁 Sürprizi Başlat!'):
+        st.session_state.drum=0
+        go('drum')
+elif st.session_state.page=='drum':
+    n=st.session_state.drum
+    if n<3:
+        st.markdown('# 🥁 DUM DUM DUM...')
+        st.markdown(f'# {3-n} 🎉')
+        st.progress((n+1)/3)
+        if st.button('🥁 '+('Hediyeyi Aç!' if n==2 else 'Davul Çal!')):
+            st.session_state.drum+=1
+            st.rerun()
+    else:
+        st.balloons()
+        st.markdown('# 🎉 SÜRPRİİİZ AHMED!')
+        st.markdown('## 💻 HEDİYEN BİR BİLGİSAYAR!')
+        st.write('Üstelik nasıl bir bilgisayar olacağına **SEN** karar vereceksin!')
+        if st.button('➡️ Bilgisayarımı Seç'): go('choose')
+elif st.session_state.page=='choose':
+    st.markdown('# 💻 Hayalindeki bilgisayarı seç')
+    st.write('Ahmed, laptop mu yoksa masaüstü PC mi istersin?')
+    choice=st.radio('Bilgisayar türü', ['Laptop','Masaüstü PC'], index=None, key='choice')
+    if st.button('Seçimime Devam Et ➡️',disabled=choice is None):
+        st.session_state.kind=choice
+        st.session_state.answers={}
+        st.session_state.idx=0
+        go('questions')
+elif st.session_state.page=='questions':
+    i=st.session_state.idx
+    q=questions[i]
+    st.caption(f'{st.session_state.kind} • Soru {i+1}/{len(questions)}')
+    st.progress((i+1)/len(questions))
+    st.markdown('### '+q['title'])
+    old=st.session_state.answers.get(q['id'])
+    if q['options']:
+        value=st.radio('Cevabın',q['options'],index=q['options'].index(old) if old in q['options'] else None,key=f'answer_{q["id"]}')
+    else:
+        value=st.text_area('Cevabın (isteğe bağlı)',value=old or '',key=f'answer_{q["id"]}')
+    if q['help']: st.info(q['help'])
+    left,right=st.columns(2)
+    with left:
+        if st.button('⬅️ Geri'):
+            st.session_state.answers[q['id']]=value
+            if i==0: go('choose')
+            else:
+                st.session_state.idx-=1
+                st.rerun()
+    with right:
+        if st.button('Bitir 🎉' if i==len(questions)-1 else 'Devam ➡️',disabled=value is None):
+            st.session_state.answers[q['id']]=value
+            if i==len(questions)-1: go('done')
+            else:
+                st.session_state.idx+=1
+                st.rerun()
+elif st.session_state.page=='done':
+    st.markdown('# 🎉 TEBRİKLER AHMED!')
+    st.markdown('### 💻 Hayalindeki bilgisayarı tasarladın!')
+    st.success('Seçimlerini tamamladık! Birlikte bilgisayar alışverişine çıktığımızda bunlara göre bakacağız. Senin için en uygun bilgisayarı birlikte seçeceğiz. İyi ki doğdun Ahmed! ❤️')
+    lines=["AHMED'İN 15. YAŞ BİLGİSAYAR TERCİHLERİ",'Bilgisayar türü: '+st.session_state.kind,'']
+    for q in questions:
+        val=st.session_state.answers.get(q['id']) or 'Belirtilmedi'
+        st.write('**'+q['title']+'**')
+        st.write(val)
+        lines.extend([q['title'],val,''])
+    lines.append('Not: Tercihler alışverişte değerlendirilecek; fiyat ve uyumluluk ayrıca kontrol edilecek.')
+    body='\n'.join(lines)
+    st.download_button('📄 Tercihleri metin dosyası olarak kaydet',body,file_name='ahmed_bilgisayar_tercihleri.txt',mime='text/plain')
+    mailto='mailto:rumeysa.elis@gmail.com?subject='+quote("Ahmed'in 15. Yaş Bilgisayar Tercihleri")+'&body='+quote(body)
+    st.link_button('📧 Seçimlerimi E-posta ile Gönder',mailto)
+    st.caption('E-posta uygulamasında hazır mesaj açılır. Göndermeyi ayrıca onaylamalısın. Uygulama cevapları sunucuda kalıcı olarak saklamaz.')
+    if st.button('✏️ Seçimlerimi Düzenle'):
+        st.session_state.idx=0
+        go('questions')
+    if st.button('🎁 Baştan Başla'):
+        st.session_state.kind=None
+        st.session_state.answers={}
+        go('welcome')
